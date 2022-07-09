@@ -1,0 +1,104 @@
+.container {
+    .kanban {
+      display: flex;
+      .section {
+        flex: 1;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        .title {
+          color: #000083;
+          padding-bottom: 30px;
+        }
+        .content {
+          border-right: 2px solid #d2deeb;
+          align-content: stretch;
+          flex-grow: 1;
+          display: flex;
+          flex-direction: column;
+          padding: 0 20px;
+          background-color: #edf3f7;
+          .card {
+            text-align: left;
+            min-height: 60px;
+            padding: 10px;
+            width: 100%;
+            background: #fff;
+            border-radius: 10px;
+            margin: 10px 0;
+            transition: all ease 0.2s;
+            box-sizing: border-box;
+            box-shadow: 0px 5px 5px 0px rgb(0 0 0 / 20%);
+            .delete {
+              background: red;
+              color: #fff;
+              outline: 0;
+              border: 0;
+              border-radius: 5px;
+              cursor: pointer;
+              padding: 5px;
+            }
+          }
+        }
+      }
+    }
+    .newTodoContainer {
+      position: fixed;
+      bottom: 0;
+      height: 50px;
+      background: #fff;
+      width: 100%;
+      .newTodoForm {
+        width: 95%;
+        display: flex;
+        grid-gap: 20px;
+        gap: 20px;
+        height: 80px;
+        position: relative;
+        top: -40px;
+        background: #fff;
+        align-items: center;
+        margin: 0 20px;
+        box-sizing: border-box;
+        border-radius: 5px;
+        padding: 0 20px;
+        box-shadow: 0px 0px 10px 0px rgb(0 0 0 / 40%);
+        .newTodo {
+          width: 100%;
+          justify-content: flex-start;
+          display: flex;
+          text-align: left;
+          flex-direction: column;
+          .select {
+            padding-top: 10px;
+            label {
+              color: #b9cbda;
+            }
+          }
+        }
+        .input {
+          display: flex;
+          flex-grow: 1;
+          height: 25px;
+          background: #edf3f7;
+          border: 0;
+          width: 100%;
+          outline: 0;
+          color: #8eaac2;
+          &::placeholder {
+            color: #8eaac2;
+          }
+        }
+        .button {
+          width: 150px;
+          height: 30px;
+          background: #00b883;
+          color: #fff;
+          outline: 0;
+          border: 0;
+          border-radius: 5px;
+          cursor: pointer;
+        }
+      }
+    }
+  }

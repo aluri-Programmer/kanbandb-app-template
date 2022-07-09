@@ -1,8 +1,8 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
-
+import './App.scss';
+import Kanban from './components/Kanban/Kanban';
 import KanbanDB from 'kanbandb';
+let instance;
 
 async function initialize() {
   /**
@@ -12,36 +12,27 @@ async function initialize() {
    * 
    * This code (initialize function) is for demonstration only.
    */
-  const instance = await KanbanDB.connect(null);
-  instance.addCard({
-    name: 'Test',
-    description: 'Test',
-    status: 'IN_PROGRESS'
-  });
+  instance = await KanbanDB.connect(null);
+  // instance.addCard({
+  //     name: 'testin',
+  //     description: 'testin',
+  //     status: 'TODO'
+  // })
+  return instance
 }
 
 function App() {
-  // Initialize DB communications.
-  initialize();
+  const a = initialize();
 
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <h1>
+        Kanban Board
+      </h1>
+      <Kanban instance={a} />
     </div>
   );
 }
 
 export default App;
+
