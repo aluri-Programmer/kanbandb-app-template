@@ -225,6 +225,13 @@ const Kanban = (props) => {
                         <input className='input' type="text"
                             placeholder='eg: Bug: TextPoli not dispatching half stars'
                             value={newTodo} onChange={handleNewTodoChange} />
+                            <input
+                                type="text"
+                                placeholder="Task Description"
+                                value={newTodo}
+                                onChange={handleNewTodoChange}
+                                required
+                                ></input>
                         <div className='select'>
                             <label htmlFor="status">Status : </label>
                             <select name="status" id="status" onChange={handleSelectStatus} value={newTodoStatus}>
