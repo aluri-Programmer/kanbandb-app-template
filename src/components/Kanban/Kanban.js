@@ -2,53 +2,28 @@ import React, { useState } from 'react'
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd'
 
 import Card from '../Card/Card'
-import mockData from '../../Data/mockData'
+import { mockStructure, STATUS, mockTodoList } from '../../Data/mockData'
 import './Kanban.scss'
 
 
 
 const Kanban = (props) => {
-    console.log('props', props)
-
-    const taskStates = {
-        'TODO': 0,
-        'IN_PROGRESS': 1,
-        'DONE': 2
-    }
-
-    const [data, setData] = useState(mockData)
-    const [newTodo, setNewTodo] = useState('')
+    const [data, setData] = useState(mockStructure)
+    const [title, setTitle] = useState('')
+    const [description, setDescription] = useState('')
+    const [formErrors, setFormErrors] = useState({})
+    const [isLoading, setIsLoading] = useState(false)
     const [newTodoStatus, setNewTodoStatus] = useState('TODO')
 
 
 
     const getCards = async () => {
         try {
-            const inst = await props.instance;
-
-            console.log('inst', inst)
-            const cards = await inst.getCards()
-            console.log('cards', cards)
+            const dbInstance = await props.instance;
+            const cards = await dbInstance.getCards()
             const currentTasks = Object.assign([], data)
-            // const getCurrentIndex = currentTasks.findIndex(r => r.key === newRecord.status);
-            // currentTasks[getCurrentIndex].tasks.push(newRecord)
-            // setData(currentTasks)
-
-            // [
-            //     {
-            //         "id": "495f8829-3898-4bc3-8a43-12caf5e3250d",
-            //         "name": "testin",
-            //         "description": "testin",
-            //         "status": "TODO",
-            //         "created": 1657384021468,
-            //         "lastUpdated": 1657384021468
-            //     },
-            // ]
-
-            // taskStates
-
             cards.forEach(card => {
-                const taskIndex = taskStates[card.status]
+                const taskIndex = STATUS[card.status]
                 currentTasks[taskIndex].tasks.push(card)
             });
 
@@ -58,53 +33,76 @@ const Kanban = (props) => {
         }
     }
 
+    const createInitialTods = async () => {
+        const dbInstance = await props.instance;
+        mockTodoList.forEach(record => {
+            dbInstance.addCard(record)
+        })
+    }
+
     React.useEffect(() => {
         // Initialize DB communications.
-
+        createInitialTods()
         getCards();
     }, [])
 
     const resetStates = () => {
-        setNewTodo('')
+        setTitle('')
+        setDescription('')
         setNewTodoStatus('TODO')
     }
 
     const addNewTask = async () => {
         try {
-            const inst = await props.instance;
-            const newId = await inst.addCard({
-                name: newTodo,
-                description: newTodo,
-                status: newTodoStatus
-            })
+            let valid = true;
+            const errors = Object.assign({})
+            if (!title) {
+                errors.title = 'Task name is Required'
+                valid = false
+            }
+            if (!description) {
+                errors.description = 'Task Description is Required'
+                valid = false
+            }
 
-            const newRecord = await inst.getCardById(newId);
-            const currentTasks = Object.assign([], data)
-            const getCurrentIndex = currentTasks.findIndex(r => r.key === newRecord.status);
-            currentTasks[getCurrentIndex].tasks.push(newRecord)
+            if (valid) {
+                setIsLoading(true)
+                setFormErrors({})
+                const dbInstance = await props.instance;
+                const newId = await dbInstance.addCard({
+                    name: title,
+                    description: description,
+                    status: newTodoStatus
+                })
 
-            setData(currentTasks)
-            resetStates()
+                const newTaskDetails = await dbInstance.getCardById(newId);
+                const currentAllTasks = Object.assign([], data)
+                const getCurrentTaskIndex = currentAllTasks.findIndex(r => r.key === newTaskDetails.status);
+                currentAllTasks[getCurrentTaskIndex].tasks.push(newTaskDetails)
+
+                setData(currentAllTasks)
+                resetStates()
+                setIsLoading(false)
+            }
+            else {
+                setFormErrors(errors)
+            }
         } catch (error) {
             console.log('ADDING ERROR', error)
+            setIsLoading(false)
         }
     }
 
     const updateInDB = async (id, status) => {
         try {
-            const inst = await props.instance;
-            // getCards();
-            console.log('id', id, typeof id)
-            const card = await inst.getCardById(id);
-            console.log('card data', card);
-            const newRecord = await inst.getCardById(id);
-            console.log('newRecord', newRecord)
-            const cardTobeUpdated = { ...newRecord, status }
-            console.log('cardTobeUpdated', cardTobeUpdated)
-            const updatedCard = await inst.updateCardById(newRecord.id, cardTobeUpdated)
-            console.log('updatedCard', updatedCard);
+            const dbInstance = await props.instance;
+            const newTaskDetails = await dbInstance.getCardById(id);
+            const taskToUpdate = { ...newTaskDetails, status }
+            await dbInstance.updateCardById(newTaskDetails.id, taskToUpdate)
+            return taskToUpdate;
         } catch (error) {
-            console.log('error', error);
+            console.log('updating Error', error);
+            return null
         }
     }
 
@@ -113,34 +111,37 @@ const Kanban = (props) => {
         const { source, destination } = result
 
         if (source.droppableId !== destination.droppableId) {
-            debugger
-            const sourceColIndex = data.findIndex(e => e.id === source.droppableId)
-            const destinationColIndex = data.findIndex(e => e.id === destination.droppableId)
+            setIsLoading(true)
+            const clonedData = Object.assign([], data)
+            const sourceColIndex = clonedData.findIndex(e => e.id === source.droppableId)
+            const destinationColIndex = clonedData.findIndex(e => e.id === destination.droppableId)
 
-            const sourceCol = data[sourceColIndex]
-            const destinationCol = data[destinationColIndex]
+            const sourceCol = clonedData[sourceColIndex]
+            const destinationCol = clonedData[destinationColIndex]
 
             const sourceTask = [...sourceCol.tasks]
             const destinationTask = [...destinationCol.tasks]
 
-            // const currentCard = sourceTask[source.index]
-
-            // const removingCard = sourceTask[source.index]
 
             const [removed] = sourceTask.splice(source.index, 1)
 
-            updateInDB(removed.id, destinationCol.key)
+            const updatedTask = await updateInDB(removed.id, destinationCol.key)
 
-            destinationTask.splice(destination.index, 0, removed)
+            destinationTask.splice(destination.index, 0, updatedTask)
 
-            data[sourceColIndex].tasks = sourceTask
-            data[destinationColIndex].tasks = destinationTask
-            setData(data)
+            clonedData[sourceColIndex].tasks = sourceTask
+            clonedData[destinationColIndex].tasks = destinationTask
+            setData(clonedData)
+            setIsLoading(false)
         }
     }
 
-    const handleNewTodoChange = (e) => {
-        setNewTodo(e.target.value)
+    const handleNewTitleTodoChange = (e) => {
+        setTitle(e.target.value)
+    }
+
+    const handleNewTodoDescription = (e) => {
+        setDescription(e.target.value)
     }
 
     const handleSelectStatus = (e) => {
@@ -148,17 +149,15 @@ const Kanban = (props) => {
     }
 
     const handleDeleteTask = async (taskDetails, index) => {
-        console.log('taskDetails', taskDetails)
         try {
-            const inst = await props.instance;
-            const deletedTask = await inst.deleteCardById(taskDetails.id);
-            console.log('deletedTask', deletedTask)
-            const currentTasks = Object.assign([], data)
-            const taskIndexPos = taskStates[taskDetails.status]
-            currentTasks[taskIndexPos].tasks.splice(index, 1)
+            const dbInstance = await props.instance;
+            await dbInstance.deleteCardById(taskDetails.id);
+            const currentAllTasks = Object.assign([], data)
+            debugger;
+            const taskIndexPosition = STATUS[taskDetails.status]
+            currentAllTasks[taskIndexPosition].tasks.splice(index, 1)
 
-            setData(currentTasks)
-            // resetStates()
+            setData(currentAllTasks)
         } catch (error) {
             console.log('DELETING ERROR', error)
         }
@@ -166,6 +165,13 @@ const Kanban = (props) => {
 
     return (
         <div className='container'>
+            {
+                isLoading && <div className='loader-container'>
+                    <div className='loader'></div>
+                </div>
+            }
+
+
             <DragDropContext onDragEnd={onDragEnd}>
                 <div className="kanban">
                     {
@@ -202,7 +208,7 @@ const Kanban = (props) => {
                                                                 }}
                                                             >
                                                                 <Card >
-                                                                    <div className='title'>{task.name}</div>
+                                                                    <div className='title'>{task.name} : {task.description}</div>
                                                                     <button className='delete' onClick={() => handleDeleteTask(task, index)}>Delete</button>
                                                                 </Card>
                                                             </div>
@@ -221,22 +227,22 @@ const Kanban = (props) => {
             </DragDropContext>
             <div className='newTodoContainer'>
                 <div className='newTodoForm'>
-                    <div className='newTodo'>
-                        <input className='input' type="text"
-                            placeholder='eg: Bug: TextPoli not dispatching half stars'
-                            value={newTodo} onChange={handleNewTodoChange} />
-                            <input
-                                type="text"
-                                placeholder="Task Description"
-                                value={newTodo}
-                                onChange={handleNewTodoChange}
-                                required
-                                ></input>
+                    <div className='form'>
+                        <div className='inputElement'>
+                            <input className='input title' type="text" name="title"
+                                placeholder="Task name"
+                                value={title} onChange={handleNewTitleTodoChange} />
+                            {formErrors && formErrors['title'] && <p className='error'>{formErrors['title']}</p>}</div>
+                        <div className='inputElement'><input className='input description' type="text" name="description"
+                            placeholder="Task Description"
+                            value={description} onChange={handleNewTodoDescription} />
+                            {formErrors && formErrors['description'] && <p className='error'>{formErrors['description']}</p>}
+                        </div>
                         <div className='select'>
                             <label htmlFor="status">Status : </label>
                             <select name="status" id="status" onChange={handleSelectStatus} value={newTodoStatus}>
-                                {Object.keys(taskStates).map(status => {
-                                    return <option value={status}>{status}</option>
+                                {Object.keys(STATUS).map(status => {
+                                    return <option value={status} key={status}>{status}</option>
                                 })}
                             </select>
                         </div>
