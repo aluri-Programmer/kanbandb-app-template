@@ -1,106 +1,153 @@
 .container {
-    .kanban {
+  .kanban {
+    display: flex;
+    .section {
+      flex: 1;
+      flex-grow: 1;
       display: flex;
-      background-color: #edf3f7;
-      .section {
-        flex: 1;
+      flex-direction: column;
+      .title {
+        color: #000083;
+        padding-bottom: 30px;
+      }
+      .content {
+        border-right: 2px solid #d2deeb;
+        align-content: stretch;
         flex-grow: 1;
         display: flex;
         flex-direction: column;
-        border-right: 2px solid #d2deeb;
-        .title {
-          color: black;
-          font-weight: bold;
-          font-size: 20px;
-          padding-bottom: 30px;
-        }
-        .content {
-          align-content: stretch;
-          flex-grow: 1;
-          display: flex;
-          flex-direction: column;
-          padding: 0 20px;
-          .card {
-            text-align: left;
-            min-height: 60px;
-            padding: 10px;
-            width: 100%;
-            background: #fff;
-            border-radius: 10px;
-            margin: 10px 0;
-            transition: all ease 0.2s;
-            box-sizing: border-box;
-            box-shadow: 0px 5px 5px 0px rgb(0 0 0 / 20%);
-            .delete {
-              background: red;
-              color: #fff;
-              outline: 0;
-              border: 0;
-              border-radius: 5px;
-              cursor: pointer;
-              padding: 5px;
-            }
-          }
-        }
-      }
-    }
-    .newTodoContainer {
-      position: fixed;
-      bottom: 0;
-      height: 50px;
-      background: #fff;
-      width: 100%;
-      .newTodoForm {
-        width: 95%;
-        display: flex;
-        grid-gap: 20px;
-        gap: 20px;
-        height: 80px;
-        position: relative;
-        top: -40px;
-        background: #fff;
-        align-items: center;
-        margin: 0 20px;
-        box-sizing: border-box;
-        border-radius: 5px;
         padding: 0 20px;
-        box-shadow: 0px 0px 10px 0px rgb(0 0 0 / 40%);
-        .newTodo {
-          width: 100%;
-          justify-content: flex-start;
-          display: flex;
+        background-color: #edf3f7;
+        .card {
           text-align: left;
-          flex-direction: column;
-          .select {
-            padding-top: 10px;
-            label {
-              color: #b9cbda;
-            }
-          }
-        }
-        .input {
-          display: flex;
-          flex-grow: 1;
-          height: 25px;
-          background: #edf3f7;
-          border: 0;
+          min-height: 60px;
+          padding: 10px;
           width: 100%;
-          outline: 0;
-          color: #8eaac2;
-          &::placeholder {
-            color: #8eaac2;
+          background: #fff;
+          border-radius: 10px;
+          margin: 10px 0;
+          transition: all ease 0.2s;
+          box-sizing: border-box;
+          box-shadow: 0px 5px 5px 0px rgb(0 0 0 / 20%);
+          .delete {
+            background: red;
+            color: #fff;
+            outline: 0;
+            border: 0;
+            border-radius: 5px;
+            cursor: pointer;
+            padding: 5px;
           }
-        }
-        .button {
-          width: 150px;
-          height: 30px;
-          background: #00b883;
-          color: #fff;
-          outline: 0;
-          border: 0;
-          border-radius: 5px;
-          cursor: pointer;
         }
       }
     }
   }
+  .newTodoContainer {
+    position: fixed;
+    bottom: 0;
+    height: 50px;
+    background: #fff;
+    width: 100%;
+    .newTodoForm {
+      width: 95%;
+      display: flex;
+      grid-gap: 20px;
+      gap: 20px;
+      height: 120px;
+      position: relative;
+      top: -85px;
+      background: #fff;
+      align-items: center;
+      margin: 0 20px;
+      box-sizing: border-box;
+      border-radius: 5px;
+      padding: 0 20px;
+      box-shadow: 0px 0px 10px 0px rgb(0 0 0 / 40%);
+      .form {
+        width: 100%;
+        justify-content: flex-start;
+        display: flex;
+        text-align: left;
+        flex-direction: column;
+        .select {
+          padding-top: 10px;
+          label {
+            color: black
+          }
+        }
+      }
+      .form {
+        width: 100%;
+        text-align: left;
+      }
+      .input {
+        display: flex;
+        flex-grow: 1;
+        height: 25px;
+        background: #edf3f7;
+        border: 0;
+        width: 100%;
+        outline: 0;
+        color: #8eaac2;
+        margin-top: 5px;
+        &::placeholder {
+          color: #8eaac2;
+        }
+      }
+      p.error {
+        font-size: 10px;
+        margin: 0;
+        padding: 0;
+        color: red;
+      }
+      .button {
+        width: 150px;
+        height: 30px;
+        background: #00b883;
+        color: #fff;
+        outline: 0;
+        border: 0;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+    }
+  }
+  .loader-container {
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    z-index: 100;
+    background: #fff;
+    opacity: 0.5;
+    top: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    .loader {
+      border: 16px solid #f3f3f3;
+      border-radius: 50%;
+      border-top: 16px solid #3498db;
+      width: 120px;
+      height: 120px;
+      -webkit-animation: spin 2s linear infinite; /* Safari */
+      animation: spin 2s linear infinite;
+    }
+  }
+  @-webkit-keyframes spin {
+    0% {
+      -webkit-transform: rotate(0deg);
+    }
+    100% {
+      -webkit-transform: rotate(360deg);
+    }
+  }
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+}
